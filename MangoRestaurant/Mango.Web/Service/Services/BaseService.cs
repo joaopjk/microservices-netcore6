@@ -17,7 +17,7 @@ namespace Mango.Web.Service.Services
 
         public BaseService(IHttpClientFactory httpClient)
         {
-            this.responseModel = new();
+            this.responseModel = new ResponseDTO();
             this.httpClient = httpClient;
         }
 
@@ -29,7 +29,7 @@ namespace Mango.Web.Service.Services
 
                 HttpRequestMessage message = new();
                 message.Headers.Add("Accept", "application/json");
-                message.RequestUri = new(apiRequest.Url);
+                message.RequestUri = new Uri(apiRequest.Url);
 
                 client.DefaultRequestHeaders.Clear();
 
