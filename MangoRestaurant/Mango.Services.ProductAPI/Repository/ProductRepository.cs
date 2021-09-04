@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -32,14 +33,34 @@ namespace Mango.Services.ProductAPI.Repository
             return _mapper.Map<ProductDTO>(product);
         }
 
-        public Task<ProductDTO> CreateUpdateProduct(ProductDTO productDto)
+        public async Task<ProductDTO> CreateUpdateProduct(ProductDTO productDto)
         {
-            throw new System.NotImplementedException();
+            var product = _mapper.Map<ProductDTO, Product>(productDto);
+
+            if (product.ProductId > 0)
+                _db.Update(product);
+            else
+                _db.Add(product);
+            await _db.SaveChangesAsync();
+
+            return _mapper.Map<Product, ProductDTO>(product);
         }
 
-        public Task<bool> DeleteProduct(int productId)
+        public async Task<bool> DeleteProduct(int productId)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                var product = await _db.Products.Where(x => x.ProductId == productId).FirstOrDefaultAsync();
+                if (product == null) return false;
+
+                _db.Products.Remove(product);
+                return await _db.SaveChangesAsync() > 0;
+
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
     }
 }
