@@ -7,7 +7,7 @@ namespace Mango.Services.Indentity
     public static class SD
     {
         public const string Admin = "Admin";
-        public const string Costumer = "Costumer";
+        public const string Custumer = "Custumer";
 
         public static IEnumerable<IdentityResource> IdentityResources =>
             new List<IdentityResource>
