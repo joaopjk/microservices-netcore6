@@ -1,3 +1,4 @@
+using System;
 using Mango.Web.Service.IServices;
 using Mango.Web.Service.Services;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +26,25 @@ namespace Mango.Web
             services.AddScoped<IProductService, ProductService>();
 
             services.AddControllersWithViews();
+
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = "Cookies";
+                    options.DefaultChallengeScheme = "oidc";
+                })
+                .AddCookie("Cookies", c => c.ExpireTimeSpan = TimeSpan.FromMinutes(60))
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.Authority = Configuration["ServiceUrls:IdentityApi"];
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    options.ClientId = "mango";
+                    options.ClientSecret = "secret";
+                    options.ResponseType = "code";
+                    options.TokenValidationParameters.NameClaimType = "name";
+                    options.TokenValidationParameters.RoleClaimType = "role";
+                    options.Scope.Add("mango");
+                    options.SaveTokens = true;
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -44,7 +64,7 @@ namespace Mango.Web
             app.UseRouting();
 
             app.UseAuthorization();
-
+            app.UseAuthentication();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
