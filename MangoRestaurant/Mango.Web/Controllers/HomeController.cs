@@ -35,11 +35,11 @@ namespace Mango.Web.Controllers
             return View(list);
         }
 
-        public async Task<IActionResult> Details(int productId)
+        public async Task<IActionResult> Details(int ProductId)
         {
             ProductDTO model = new();
 
-            var response = await _productService.GetProductByIdAsync<ResponseDTO>(productId);
+            var response = await _productService.GetProductByIdAsync<ResponseDTO>(ProductId);
             if (response is {IsSuccess: true})
             {
                 model = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result) ?? String.Empty);
