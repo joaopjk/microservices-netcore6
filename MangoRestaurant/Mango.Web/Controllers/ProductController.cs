@@ -66,5 +66,31 @@ namespace Mango.Web.Controllers
             }
             return View(model);
         }
+        public async Task<IActionResult> ProductDelete(int productId)
+        {
+            if (ModelState.IsValid)
+            {
+                var response = await _productService.GetProductByIdAsync<ResponseDTO>(productId);
+                if (response is { IsSuccess: true })
+                {
+                    ProductDTO model =
+                        JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result) ?? string.Empty);
+                    return View(model);
+                }
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ProductDelete(ProductDTO model)
+        {
+            if (ModelState.IsValid)
+            {
+                var response = await _productService.DeleteProductAsync<ResponseDTO>(model.ProductId);
+                if (response is { IsSuccess: true })
+                    return RedirectToAction(nameof(ProductIndex));
+            }
+            return View(model);
+        }
     }
 }
