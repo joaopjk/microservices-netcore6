@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+using System.Net.Http;
 using Mango.Web.Service.IServices;
 using Mango.Web.Service.Services;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Mango.Web
 {
@@ -32,10 +35,10 @@ namespace Mango.Web
                     options.DefaultScheme = "Cookies";
                     options.DefaultChallengeScheme = "oidc";
                 })
-                .AddCookie("Cookies", c => c.ExpireTimeSpan = TimeSpan.FromMinutes(60))
+                .AddCookie("Cookies", c => c.ExpireTimeSpan = TimeSpan.FromMinutes(10))
                 .AddOpenIdConnect("oidc", options =>
                 {
-                    options.Authority = Configuration["ServiceUrls:IdentityApi"];
+                    options.Authority = Configuration["ServiceUrls:IdentityAPI"];
                     options.GetClaimsFromUserInfoEndpoint = true;
                     options.ClientId = "mango";
                     options.ClientSecret = "secret";
@@ -44,6 +47,14 @@ namespace Mango.Web
                     options.TokenValidationParameters.RoleClaimType = "role";
                     options.Scope.Add("mango");
                     options.SaveTokens = true;
+                    options.BackchannelHttpHandler = new HttpClientHandler
+                    {
+                        DefaultProxyCredentials = CredentialCache.DefaultCredentials
+                    };
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true
+                    };
                 });
         }
 
@@ -60,11 +71,9 @@ namespace Mango.Web
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

@@ -41,6 +41,7 @@ namespace Mango.Services.Indentity
                 .AddAspNetIdentity<ApplicationUser>();
             services.AddScoped<IDbInitializer, DbInitializer>();
             builder.AddDeveloperSigningCredential();
+            builder.AddDeveloperSigningCredential();
             services.AddControllersWithViews();
         }
 
